@@ -1,11 +1,10 @@
 
 class DataClass
   def initialize(data,data_b,id)
-    @date_out = Time.now.to_i + data[1].to_i
-    if (data[1].to_i==0)
-      @date_out = Time.now.to_i + 60*60*24*30
+    @date_out = Time.now.to_i + data[2].to_i
+    if (data[2].to_i==0)
+      @date_out = Time.now.to_i + 60*60*24*30 #30 days from now
     end
-    @flags = data[0]
     @data = data
     @data_block = data_b
     @id = id
@@ -21,7 +20,7 @@ class DataClass
 
   def setData_block(data_b)
     @data_block = data_b
-    @data[2] = data_b.length
+    @data[3] = data_b.length
   end
 
   def getData()

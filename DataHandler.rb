@@ -50,15 +50,19 @@ class Data_handler
   end
 
   def cas(key,data,data_block)
-    if(@datas[key] == nil) && (data[3] == @datas[key].getId)
-      return self.set(key,data,data_block)
+    if(@datas[key] != nil)
+      if (data[4] == @datas[key].getId)
+        return self.set(key,data,data_block)
+      end
+      return "EXISTS"
     end
+    return "NOT_FOUND"
   end
 
   ##########GETTERS##########
   def get(key)
     if (@datas[key]!=nil)
-      return @datas[key].getData().reject.with_index { |_el, index| index == 1 }.join(' ')
+      return @datas[key].getData().reject.with_index { |_el, index| index == 2 }.join(' ')
     end
   return nil
   end

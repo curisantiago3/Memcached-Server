@@ -33,41 +33,93 @@ class Server
             conn.puts "Connection established successfully #{conn_name} => #{conn}, use memcached commands to manage your data"
             loop do
                message = conn.gets.chomp
-               manage_data(message,conn)
+               if( isCorrect(message.split[0..-1]))  #check if command line is correct
+                 manage_data(message,conn)
+               else
+                 conn.puts "CLIENT_ERROR bad command line format"
                end
-             end
+               end
+           end
        }
+   end
+
+   def isCorrect(message)
+     if (message[0] == "get") || (message[0] == "gets")
+       return true
+     else
+       flag = ((message[2].is_a?(Integer)) && (message[3].is_a?(Integer)) && (message[4].is_a?(Integer)))
+       if (message[0] == 'cas')
+         return ( (message.size() < 6) && flag )
+       else
+         return ( (message.size() < 5) && flag )
+       end
+     end
    end
 
 
    def manage_data(message,connection)
      command = message.split.first
      key = message.split[1]
-     data = message.split(' ')[2..-1]
+     data = message.split(' ')[1..-1]
      case command
+
+########## STORAGE ##########
+
       when 'set'
-        data_block = connection.read(data[2].to_i)
-        connection.puts @data_hash.set(key,data,data_block)
+        data_block = connection.read(data[3].to_i).chomp
+        rest = connection.gets.chomp
+        if (rest.length == 0) #data is not bigger than it should be
+          connection.puts @data_hash.set(key,data,data_block)
+        else
+          connection.puts "CLIENT_ERROR bad data chunk"
+        end
 
       when 'add'
-        data_block = connection.read(data[2].to_i)
-        connection.puts @data_hash.add(key,data,data_block)
+        data_block = connection.read(data[3].to_i).chomp
+        rest = connection.gets.chomp
+        if (rest.length == 0)
+          connection.puts @data_hash.add(key,data,data_block)
+        else
+          connection.puts "CLIENT_ERROR bad data chunk"
+        end
 
       when 'replace'
-        connection.puts @data_hash.replace(key,data)
+        data_block = connection.read(data[3].to_i).chomp
+        rest = connection.gets.chomp
+        if (rest.length == 0)
+          connection.puts @data_hash.replace(key,data,data_block)
+        else
+          connection.puts "CLIENT_ERROR bad data chunk"
+        end
 
       when 'append'
-        data_block = connection.read(data[2].to_i)
-        connection.puts @data_hash.append(key,data,data_block)
+        data_block = connection.read(data[3].to_i).chomp
+        rest = connection.gets.chomp
+        if (rest.length == 0)
+          connection.puts @data_hash.append(key,data,data_block)
+        else
+          connection.puts "CLIENT_ERROR bad data chunk"
+        end
 
       when 'prepend'
-        data_block = connection.read(data[2].to_i)
-        connection.puts @data_hash.prepend(key,data,data_block)
+        data_block = connection.read(data[3].to_i).chomp
+        rest = connection.gets.chomp
+        if (rest.length == 0)
+          connection.puts @data_hash.prepend(key,data,data_block)
+        else
+          connection.puts "CLIENT_ERROR bad data chunk"
+        end
 
       when 'cas'
-          data_block = connection.read(data[2].to_i)
+        data_block = connection.read(data[3].to_i).chomp
+        rest = connection.gets.chomp
+        if (rest.length == 0)
           connection.puts @data_hash.cas(key,data,data_block)
+        else
+          connection.puts "CLIENT_ERROR bad data chunk"
+        end
 
+########## RECIEVE ##########
 
       when 'get'
         keys = message.split(' ')[1..-1]
@@ -89,12 +141,13 @@ class Server
         end
         connection.puts "END"
 
-      else
+     else
         connection.puts "ERROR"
     end
+########## UPDATE EXPIRED KEYS ##########
     @data_hash.deleteExpired()
   end
 
 end
 
-Server.new( 2000, "localhost" )
+Server.new( 2000, '127.0.0.1' )
