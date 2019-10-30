@@ -33,12 +33,12 @@ class Server
             conn.puts "Connection established successfully #{conn_name} => #{conn}, use memcached commands to manage your data"
             loop do
                message = conn.gets.chomp
-               if( isCorrect(message.split[0..-1]))  #check if command line is correct
+               if( isCorrect(message.split(' ')[0..-1]))  #check if command line is correct
                  manage_data(message,conn)
                else
                  conn.puts "CLIENT_ERROR bad command line format"
                end
-               end
+            end
            end
        }
    end
@@ -47,11 +47,11 @@ class Server
      if (message[0] == "get") || (message[0] == "gets")
        return true
      else
-       flag = ((message[2].is_a?(Integer)) && (message[3].is_a?(Integer)) && (message[4].is_a?(Integer)))
+       flag = (is_number?(message[2])) && (is_number?(message[3])) && (is_number?(message[4]))
        if (message[0] == 'cas')
-         return ( (message.size() < 6) && flag )
+         return ( (message.size() == 6) && flag )
        else
-         return ( (message.size() < 5) && flag )
+         return ( (message.size() == 5) && flag )
        end
      end
    end
@@ -146,6 +146,10 @@ class Server
     end
 ########## UPDATE EXPIRED KEYS ##########
     @data_hash.deleteExpired()
+  end
+
+  def is_number? (string)
+    true if Float(string) rescue false
   end
 
 end
