@@ -1,6 +1,5 @@
 require 'socket'
-require 'dalli'
-
+require_relative 'DataHandler'
 
 class Server
    def initialize(socket_address, socket_port)
@@ -8,13 +7,10 @@ class Server
 
       @connections_details = Hash.new
       @connected_clients = Hash.new
-
-      @datas = Hash.new
-
+      @data_hash = Data_handler.new()
 
       @connections_details[:server] = @server_socket
       @connections_details[:clients] = @connected_clients
-      @connected_clients[:datas] = @datas
 
       puts 'Started server.........'
       run
@@ -23,7 +19,7 @@ class Server
 
    def run
       loop{
-         client_connection = @server_socket.accept
+           client_connection = @server_socket.accept
            Thread.start(client_connection) do |conn| # open thread for each accepted connection
             conn_name = conn.gets.chomp.to_sym
             if(@connections_details[:clients][conn_name] != nil) # avoid connection if user exits
@@ -35,48 +31,70 @@ class Server
             puts "Connection established #{conn_name} => #{conn}"
             @connections_details[:clients][conn_name] = conn
             conn.puts "Connection established successfully #{conn_name} => #{conn}, use memcached commands to manage your data"
-            puts client_connection
-            puts conn
-            puts @connections_details[:server]
-            puts @connections_details[:clients]
-            puts @connected_clients
-            establish_chatting(conn_name, conn) # allow chatting
-         end
+            loop do
+               message = conn.gets.chomp
+               manage_data(message,conn)
+               end
+             end
        }
    end
 
-   def establish_chatting(username, connection)
-      loop do
-         message = connection.gets.chomp
-         puts @connections_details[:clients]
-          @connections_details[:clients][username].puts "#{username} : #{message}"
-          command = message.split.first
-          key = message.split[2]
-          data = message.split(' ')[2..-1].join(' ')
-          response = manage_data(username,command,key,data)
-          @connections_details[:clients][username].puts response
-          #@connected_clients[:data][command]= message.split(' ')[1..-1].join(' ')
-         end
-      end
 
-   def manage_data(username,command,key,data)
+   def manage_data(message,connection)
+     command = message.split.first
+     key = message.split[1]
+     data = message.split(' ')[2..-1]
      case command
       when 'set'
-        @conections_details[:clients][username][:datas][:key] = key
-      when 'add'
-        @conections_details[:clients][username][:datas][:key] = key
-      when 'get'
-        return @conections_details[:clients][username][:datas][:key][key]
-      when 'append'
+        data_block = connection.read(data[2].to_i)
+        connection.puts @data_hash.set(key,data,data_block)
 
-      when 'prepend'
+      when 'add'
+        data_block = connection.read(data[2].to_i)
+        connection.puts @data_hash.add(key,data,data_block)
 
       when 'replace'
+        connection.puts @data_hash.replace(key,data)
+
+      when 'append'
+        data_block = connection.read(data[2].to_i)
+        connection.puts @data_hash.append(key,data,data_block)
+
+      when 'prepend'
+        data_block = connection.read(data[2].to_i)
+        connection.puts @data_hash.prepend(key,data,data_block)
 
       when 'cas'
-    end
-  end
-end
+          data_block = connection.read(data[2].to_i)
+          connection.puts @data_hash.cas(key,data,data_block)
 
+
+      when 'get'
+        keys = message.split(' ')[1..-1]
+        keys.each do |key|
+          if (@data_hash.get(key)!=nil)
+            connection.puts "VALUE #{@data_hash.get(key)}"
+            connection.puts @data_hash.getBlock(key)
+          end
+        end
+        connection.puts "END"
+
+      when 'gets'
+        keys = message.split(' ')[1..-1]
+        keys.each do |key|
+          if (@data_hash.get(key)!=nil)
+            connection.puts "VALUE #{@data_hash.gets(key)}"
+            connection.puts @data_hash.getBlock(key)
+          end
+        end
+        connection.puts "END"
+
+      else
+        connection.puts "ERROR"
+    end
+    @data_hash.deleteExpired()
+  end
+
+end
 
 Server.new( 2000, "localhost" )
