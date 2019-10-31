@@ -51,8 +51,6 @@ class Data_handler
 
   def cas(key,data,data_block)
     if(@datas[key] != nil)
-      puts data[4]
-      puts @datas[key].getId()
       if (data[4].to_i == @datas[key].getId())
         return self.set(key,data,data_block) if(!data[-1].eql?'noreply')
       end
