@@ -43,15 +43,15 @@ class Server
        }
    end
 
-   def isCorrect(message)
+   def isCorrect(message) #check if command line is correct through specific protocol
      if (message[0] == "get") || (message[0] == "gets")
        return true
      else
        flag = (is_number?(message[2])) && (is_number?(message[3])) && (is_number?(message[4]))
        if (message[0] == 'cas')
-         return ( (message.size() == 6) && flag )
+         return ( ((message.size() == 6)||(message.size() == 7 if message[6].eql?'noreply')) && flag )
        else
-         return ( (message.size() == 5) && flag )
+         return ( ((message.size() == 5)||(message.size() == 6 if message[5].eql?'noreply')) && flag )
        end
      end
    end
@@ -148,10 +148,11 @@ class Server
     @data_hash.deleteExpired()
   end
 
+########## AUX FUNCTION ##########
   def is_number? (string)
     true if Float(string) rescue false
   end
 
 end
 
-Server.new( 2000, '127.0.0.1' )
+Server.new( 2000, 'localhost' )

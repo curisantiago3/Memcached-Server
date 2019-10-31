@@ -12,51 +12,53 @@ class Data_handler
     datas = DataClass.new(data,data_block,@id)
     @datas[new_key]=datas
     @id = @id + 1
-    return "STORED"
+      return "STORED" if(!data[-1].eql?'noreply')
   end
 
   def add(key,data,data_block)
     if(@datas[key] == nil)
       @datas[key] = DataClass.new(data,data_block,@id)
       @id = @id + 1
-      return "STORED"
+      return "STORED" if(!data[-1].eql?'noreply')
     end
-    return "NOT_STORED"
+    return "NOT_STORED" if(!data[-1].eql?'noreply')
   end
 
   def replace(key,data,data_block)
     if (@datas[key]!=nil)
       @datas[key]=DataClass.new(data,data_block,@id)
       @id = @id + 1
-      return "STORED"
+      return "STORED" if(!data[-1].eql?'noreply')
     end
-    return "NOT_STORED"
+    return "NOT_STORED" if(!data[-1].eql?'noreply')
   end
 
   def append(key,data,data_block)
     if (@datas[key]!=nil)
          @datas[key].setData_block(@datas[key].getData_block().concat(data_block))
-       return "STORED"
+       return "STORED" if(!data[-1].eql?'noreply')
      end
-     return "NOT_STORED"
+     return "NOT_STORED" if(!data[-1].eql?'noreply')
   end
 
   def prepend(key,data,data_block)
     if (@datas[key]!=nil)
        @datas[key].setData_block(data_block.concat(@datas[key].getData_block()))
-       return "STORED"
+       return "STORED" if(!data[-1].eql?'noreply')
      end
-     return "NOT_STORED"
+     return "NOT_STORED" if(!data[-1].eql?'noreply')
   end
 
   def cas(key,data,data_block)
     if(@datas[key] != nil)
-      if (data[4] == @datas[key].getId)
-        return self.set(key,data,data_block)
+      puts data[4]
+      puts @datas[key].getId()
+      if (data[4].to_i == @datas[key].getId())
+        return self.set(key,data,data_block) if(!data[-1].eql?'noreply')
       end
-      return "EXISTS"
+      return "EXISTS" if(!data[-1].eql?'noreply')
     end
-    return "NOT_FOUND"
+    return "NOT_FOUND" if(!data[-1].eql?'noreply')
   end
 
   ##########GETTERS##########
