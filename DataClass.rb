@@ -7,7 +7,7 @@ class DataClass
     end
     @data = data
     @data_block = data_b
-    @id = id
+    @id = id  #This is the unique_toquen used in cas and gets commands
   end
 
   def setData(new_data)
