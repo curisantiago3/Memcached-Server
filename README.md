@@ -8,7 +8,8 @@ Run server:
 	abrir command prompt(terminal) en la carpeta del proyecto y correr el siguiente comando:
 	ruby ServerClass.rb
 	
-	El socket del servidor esta abierto para el puerto 2000
+	El socket del servidor esta abierto para el puerto 2000 'localhost'.
+	Si se desea cambiar se debe de configurar tambien del lado del cliente(ClientClass.rb y/o test.rb)
 
 Run demo Client:
 	abrir command prompt(terminal) en la carpeta del proyecto y correr el siguiente comando:

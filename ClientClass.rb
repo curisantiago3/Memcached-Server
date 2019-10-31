@@ -48,5 +48,5 @@ end
 
 
 
-socket = TCPSocket.open( "localhost", 2000 )
+socket = TCPSocket.open( "127.0.0.1", 11211 )
 Client.new( socket )

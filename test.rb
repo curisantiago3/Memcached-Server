@@ -57,7 +57,7 @@ def send_request
         @socketUser1.puts "tercer valor para key2"                   #NO RESPONSE
         @socketUser1.puts "gets key2"                                # VALUE of key2 with unique_toquen
 
-        
+
 # CAS
         @socketUser1.puts "cas key2 2 500 33 5 "                     #comment#  = 5 is the last unique_toquen of key2
         @socketUser1.puts "otro valor para key2 mediante cas"        # STORED
@@ -79,5 +79,5 @@ end
 
 end
 
-socket = TCPSocket.open( "localhost", 2000 )
+socket = TCPSocket.open( "127.0.0.1", 11211 )
 Test.new( socket,1)
