@@ -79,5 +79,5 @@ end
 
 end
 
-socket = TCPSocket.open( "127.0.0.1", 11211 )
+socket = TCPSocket.open( "127.0.0.1", 23 )
 Test.new( socket,1)

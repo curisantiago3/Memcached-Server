@@ -155,9 +155,9 @@ class Server
 
 end
 
-puts "To customize the TCP connection write 'config', if not the server will open in <11211><127.0.0.1>"
+puts "To customize the TCP connection write 'config', if not the server will open in <23><127.0.0.1>"
 config = $stdin.gets.chomp
-port = 11211
+port = 23
 ip = "127.0.0.1"
 if(config.eql?'config')
   puts "Write port: "
